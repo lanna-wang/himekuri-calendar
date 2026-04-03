@@ -146,22 +146,26 @@ body {
   );
 }
 
-/* Cherry blossom petal fall */
+/* Cherry blossom petal fall — floats across the screen */
 @keyframes petalFall {
   0% {
-    transform: translate(0, 0) rotate(0deg);
+    transform: translate(0, 0) rotate(0deg) scale(0.5);
+    opacity: 0;
+  }
+  10% {
     opacity: 0.9;
+    transform: translate(calc(var(--petal-drift) * 0.05), 20px) rotate(30deg) scale(1);
   }
-  30% {
-    transform: translate(calc(var(--petal-drift) * 0.4), 40px) rotate(120deg);
-    opacity: 0.8;
+  40% {
+    transform: translate(calc(var(--petal-drift) * 0.4), 120px) rotate(180deg) scale(1);
+    opacity: 0.85;
   }
-  60% {
-    transform: translate(calc(var(--petal-drift) * 0.8), 100px) rotate(240deg);
+  70% {
+    transform: translate(calc(var(--petal-drift) * 0.75), 280px) rotate(400deg) scale(0.9);
     opacity: 0.6;
   }
   100% {
-    transform: translate(var(--petal-drift), 180px) rotate(var(--petal-rotation));
+    transform: translate(var(--petal-drift), 500px) rotate(var(--petal-rotation)) scale(0.7);
     opacity: 0;
   }
 }

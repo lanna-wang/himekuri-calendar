@@ -26,7 +26,7 @@ export default function Home() {
         {/* Decorative illustrations */}
         <div className="pointer-events-none select-none">
           {/* Ducks — bottom left */}
-          <div className="fixed bottom-0 left-0 z-0">
+          <div className="fixed bottom-0 left-0 z-20">
             <Image
               src="/images/ducks.png"
               alt=""
