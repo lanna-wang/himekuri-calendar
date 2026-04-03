@@ -257,13 +257,15 @@ export function getStoredEntries(): GratitudeEntry[] {
 
 export function saveEntry(entry: Omit<GratitudeEntry, "id" | "createdAt">): GratitudeEntry {
   const entries = getStoredEntries();
+  // Upsert: remove existing entry for this date, then add new one
+  const filtered = entries.filter((e) => e.date !== entry.date);
   const newEntry: GratitudeEntry = {
     ...entry,
     id: generateId(),
     createdAt: new Date().toISOString(),
   };
-  entries.push(newEntry);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+  filtered.push(newEntry);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
   return newEntry;
 }
 

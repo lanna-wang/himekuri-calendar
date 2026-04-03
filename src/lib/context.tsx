@@ -62,37 +62,49 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     async function init() {
-      const { data: { session } } = await supabase.auth.getSession();
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
 
-      if (session?.user) {
-        setUserId(session.user.id);
-        setIsAuthenticated(true);
-        const dbEntries = await getUserEntries(session.user.id);
-        setEntries(dbEntries.map(dbToEntry));
-        setStreak(await computeStreak(session.user.id));
-      } else {
-        setEntries(getStoredEntries());
-        setStreak(getStreak());
+        if (session?.user) {
+          setUserId(session.user.id);
+          setIsAuthenticated(true);
+          const dbEntries = await getUserEntries(session.user.id);
+          setEntries(dbEntries.map(dbToEntry));
+          setStreak(await computeStreak(session.user.id));
+          return;
+        }
+      } catch {
+        // Supabase not available — use localStorage
       }
+
+      // No auth — fall back to localStorage
+      setEntries(getStoredEntries());
+      setStreak(getStreak());
     }
     init();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (session?.user) {
-        setUserId(session.user.id);
-        setIsAuthenticated(true);
-        const dbEntries = await getUserEntries(session.user.id);
-        setEntries(dbEntries.map(dbToEntry));
-        setStreak(await computeStreak(session.user.id));
-      } else {
-        setUserId(null);
-        setIsAuthenticated(false);
-        setEntries(getStoredEntries());
-        setStreak(getStreak());
-      }
-    });
+    let subscription: { unsubscribe: () => void } | null = null;
+    try {
+      const { data } = supabase.auth.onAuthStateChange(async (_event, session) => {
+        if (session?.user) {
+          setUserId(session.user.id);
+          setIsAuthenticated(true);
+          const dbEntries = await getUserEntries(session.user.id);
+          setEntries(dbEntries.map(dbToEntry));
+          setStreak(await computeStreak(session.user.id));
+        } else {
+          setUserId(null);
+          setIsAuthenticated(false);
+          setEntries(getStoredEntries());
+          setStreak(getStreak());
+        }
+      });
+      subscription = data.subscription;
+    } catch {
+      // ignore
+    }
 
-    return () => subscription.unsubscribe();
+    return () => subscription?.unsubscribe();
   }, []);
 
   const refreshEntries = useCallback(async () => {
