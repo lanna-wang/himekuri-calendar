@@ -1,11 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import Greeting from "@/components/Greeting";
 import CardTray from "@/components/CardTray";
 import Navigation from "@/components/Navigation";
 import SignOutButton from "@/components/SignOutButton";
 import CherryBlossomTree from "@/components/CherryBlossomTree";
+import DuckMessage from "@/components/DuckMessage";
 import { AppProvider } from "@/lib/context";
 
 export default function Home() {
@@ -24,22 +24,8 @@ export default function Home() {
         </main>
 
         {/* Decorative illustrations */}
-        <div className="pointer-events-none select-none">
-          {/* Ducks — bottom left */}
-          <div className="fixed bottom-0 left-0 z-20">
-            <Image
-              src="/images/ducks.png"
-              alt=""
-              width={280}
-              height={280}
-              className="w-[180px] sm:w-[240px] lg:w-[280px] h-auto translate-y-4"
-              priority={false}
-            />
-          </div>
-
-          {/* Cherry blossom tree — bottom right (with hover petal effect) */}
-          <CherryBlossomTree />
-        </div>
+        <DuckMessage />
+        <CherryBlossomTree />
       </div>
     </AppProvider>
   );
