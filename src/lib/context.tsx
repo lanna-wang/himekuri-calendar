@@ -62,24 +62,46 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     async function init() {
+      // Always load localStorage entries first (instant)
+      const localEntries = getStoredEntries();
+      setEntries(localEntries);
+      setStreak(getStreak());
+
       try {
         const { data: { session } } = await supabase.auth.getSession();
 
         if (session?.user) {
           setUserId(session.user.id);
           setIsAuthenticated(true);
+
+          // Load from Supabase
           const dbEntries = await getUserEntries(session.user.id);
-          setEntries(dbEntries.map(dbToEntry));
+          const dbMapped = dbEntries.map(dbToEntry);
+
+          // Merge: Supabase entries take priority, localStorage fills gaps
+          const dbDates = new Set(dbMapped.map((e) => e.date));
+          const localOnly = localEntries.filter((e) => !dbDates.has(e.date));
+
+          // Upload any localStorage-only entries to Supabase
+          for (const entry of localOnly) {
+            await submitEntryToDB({
+              userId: session.user.id,
+              date: entry.date,
+              accomplished: entry.accomplished,
+              happy: entry.happy,
+              lookingForward: entry.lookingForward,
+              starIndex: starPathToIndex(entry.starImage),
+            });
+          }
+
+          const merged = [...dbMapped, ...localOnly];
+          setEntries(merged);
           setStreak(await computeStreak(session.user.id));
           return;
         }
       } catch {
-        // Supabase not available — use localStorage
+        // Supabase not available — localStorage already loaded above
       }
-
-      // No auth — fall back to localStorage
-      setEntries(getStoredEntries());
-      setStreak(getStreak());
     }
     init();
 
@@ -120,6 +142,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const submitEntry = useCallback(
     (entry: Omit<GratitudeEntry, "id" | "createdAt">) => {
+      // Always save to localStorage as backup
+      saveEntry(entry);
+
       if (userId) {
         const starIndex = starPathToIndex(entry.starImage);
         submitEntryToDB({
@@ -130,24 +155,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
           lookingForward: entry.lookingForward,
           starIndex,
         }).then(() => refreshEntries());
-
-        // Optimistic update
-        const optimistic: GratitudeEntry = {
-          ...entry,
-          id: `${userId}-${entry.date}`,
-          createdAt: entry.date,
-        };
-        setEntries((prev) => {
-          const without = prev.filter((e) => e.date !== entry.date);
-          return [...without, optimistic];
-        });
-        return optimistic;
-      } else {
-        const newEntry = saveEntry(entry);
-        setEntries(getStoredEntries());
-        setStreak(getStreak());
-        return newEntry;
       }
+
+      // Optimistic update
+      const optimistic: GratitudeEntry = {
+        ...entry,
+        id: userId ? `${userId}-${entry.date}` : Math.random().toString(36).slice(2),
+        createdAt: entry.date,
+      };
+      setEntries((prev) => {
+        const without = prev.filter((e) => e.date !== entry.date);
+        return [...without, optimistic];
+      });
+      return optimistic;
     },
     [userId, refreshEntries]
   );
