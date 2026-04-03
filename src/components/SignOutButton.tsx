@@ -8,6 +8,9 @@ export default function SignOutButton() {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
+    // Clear auth cookies
+    document.cookie = "sb-access-token=; path=/; max-age=0";
+    document.cookie = "sb-refresh-token=; path=/; max-age=0";
     router.push("/login");
   };
 

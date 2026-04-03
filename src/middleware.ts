@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 
-export async function middleware(request: NextRequest) {
+export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Allow public routes
@@ -17,17 +16,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Check for Supabase auth token in cookies
-  const supabaseToken =
-    request.cookies.get("sb-access-token")?.value ||
-    request.cookies.get(`sb-${process.env.NEXT_PUBLIC_SUPABASE_URL?.split("//")[1]?.split(".")[0]}-auth-token`)?.value;
+  // Check for our auth cookie
+  const hasAuth = request.cookies.has("sb-access-token");
 
-  // If no auth cookie found, check if there's any sb- prefixed cookie
-  const hasSbCookie = Array.from(request.cookies.getAll()).some(
-    (c) => c.name.startsWith("sb-") && c.name.endsWith("-auth-token")
-  );
-
-  if (!supabaseToken && !hasSbCookie) {
+  if (!hasAuth) {
     const loginUrl = new URL("/login", request.url);
     return NextResponse.redirect(loginUrl);
   }
