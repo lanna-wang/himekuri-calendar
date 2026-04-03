@@ -116,9 +116,9 @@ export default function LoginPage() {
                 type="text"
                 value={otp}
                 onChange={(e) => setOtp(e.target.value)}
-                placeholder="enter 6-digit code"
+                placeholder="enter your code"
                 className="w-full px-5 py-3.5 bg-white border border-charcoal/10 font-[family-name:var(--font-mori)] text-[16px] text-charcoal text-center tracking-[0.3em] placeholder:tracking-normal placeholder:text-[#8A7E74]/50 focus:outline-none focus:border-charcoal/30 min-h-[44px]"
-                maxLength={6}
+                maxLength={8}
                 autoFocus
                 required
               />
