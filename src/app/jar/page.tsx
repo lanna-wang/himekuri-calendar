@@ -11,12 +11,13 @@ export default function JarPage() {
       <div className="min-h-[100dvh] flex flex-col">
         <Navigation />
         <main className="flex-1 flex flex-col items-center pt-4 pb-24">
-          <div className="w-full flex justify-between items-center px-6 mb-4">
-            <div />
-            <h1 className="font-[family-name:var(--font-pangaia)] text-charcoal text-xl select-none">
+          <div className="w-full relative px-6 mb-4">
+            <h1 className="font-[family-name:var(--font-pangaia)] font-medium text-charcoal text-3xl sm:text-4xl text-center select-none">
               gratitude jar
             </h1>
-            <SignOutButton />
+            <div className="absolute top-1/2 -translate-y-1/2 right-6">
+              <SignOutButton />
+            </div>
           </div>
           <JarView />
         </main>

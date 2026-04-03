@@ -91,11 +91,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
               happy: entry.happy,
               lookingForward: entry.lookingForward,
               starIndex: starPathToIndex(entry.starImage),
-            });
+            }).catch(() => {});
           }
 
-          const merged = [...dbMapped, ...localOnly];
-          setEntries(merged);
+          // Combine all entries — deduplicate by date (Supabase wins)
+          const allEntries = [...dbMapped];
+          for (const local of localOnly) {
+            if (!dbDates.has(local.date)) {
+              allEntries.push(local);
+            }
+          }
+
+          setEntries(allEntries);
+
+          // Also sync merged entries back to localStorage for this device
+          const storageKey = "himekuri_entries";
+          try {
+            localStorage.setItem(storageKey, JSON.stringify(allEntries));
+          } catch {}
+
           setStreak(await computeStreak(session.user.id));
           return;
         }

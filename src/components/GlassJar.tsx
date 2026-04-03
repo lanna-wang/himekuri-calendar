@@ -72,7 +72,7 @@ export default function GlassJar({ entries, className = "", size = "small", onSt
     <div
       ref={containerRef}
       className={`relative mx-auto ${className}`}
-      style={{ aspectRatio: "3 / 5", maxHeight: "calc(100dvh - 220px)", width: "min(100%, 340px)" }}
+      style={{ aspectRatio: "3 / 5", maxHeight: "calc(100dvh - 220px)", width: "min(100%, 500px)" }}
     >
       {/* Jar image */}
       <Image
