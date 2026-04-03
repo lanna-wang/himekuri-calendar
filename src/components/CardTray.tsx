@@ -1,32 +1,43 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useMemo } from "react";
 import CalendarCard from "./CalendarCard";
-import { getWeekDates, isSameDay, dateToKey } from "@/lib/utils";
+import { getWeekDates, isSameDay } from "@/lib/utils";
 import { MetArtwork, getArtworksForWeek } from "@/lib/met-api";
+import { useApp } from "@/lib/context";
 
 export default function CardTray() {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { weekOffset } = useApp();
   const [today] = useState(() => new Date());
-  const weekDates = getWeekDates(today);
+
+  // Compute the reference date based on week offset
+  const referenceDate = useMemo(() => {
+    const d = new Date(today);
+    d.setDate(d.getDate() + weekOffset * 7);
+    return d;
+  }, [today, weekOffset]);
+
+  const weekDates = useMemo(() => getWeekDates(referenceDate), [referenceDate]);
   const todayIndex = weekDates.findIndex((d) => isSameDay(d, today));
   const [activeIndex, setActiveIndex] = useState(todayIndex >= 0 ? todayIndex : 0);
   const [artworks, setArtworks] = useState<(MetArtwork | null)[]>(new Array(7).fill(null));
   const [loading, setLoading] = useState(true);
 
-  // Fetch artworks from Met API
+  // Fetch artworks when week changes
   useEffect(() => {
+    setLoading(true);
     getArtworksForWeek(weekDates).then((results) => {
       setArtworks(results);
       setLoading(false);
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [weekOffset]);
 
-  // Auto-scroll to today on mount (mobile)
+  // Auto-scroll to today on mount (mobile), only if current week
   useEffect(() => {
     const container = scrollRef.current;
-    if (!container || todayIndex < 0) return;
+    if (!container || todayIndex < 0 || weekOffset !== 0) return;
     if (window.innerWidth >= 640) return;
 
     const cards = container.children;
@@ -35,7 +46,7 @@ export default function CardTray() {
       const scrollLeft = card.offsetLeft - container.offsetWidth / 2 + card.offsetWidth / 2;
       container.scrollTo({ left: scrollLeft, behavior: "instant" });
     }
-  }, [todayIndex, loading]);
+  }, [todayIndex, loading, weekOffset]);
 
   // Track active card for dot indicator (mobile)
   useEffect(() => {

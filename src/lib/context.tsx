@@ -18,6 +18,7 @@ interface AppState {
   activeAnimation: string | null;
   userId: string | null;
   isAuthenticated: boolean;
+  weekOffset: number; // 0 = current week, -1 = last week, etc.
 }
 
 interface AppContextType extends AppState {
@@ -25,6 +26,10 @@ interface AppContextType extends AppState {
   hasEntryForDate: (dateStr: string) => boolean;
   setActiveAnimation: (dateKey: string | null) => void;
   refreshEntries: () => Promise<void>;
+  goToPreviousWeek: () => void;
+  goToNextWeek: () => void;
+  resetToCurrentWeek: () => void;
+  canGoNext: boolean;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -48,6 +53,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [activeAnimation, setActiveAnimation] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [weekOffset, setWeekOffset] = useState(0);
+
+  const canGoNext = weekOffset < 0;
+  const goToPreviousWeek = useCallback(() => setWeekOffset((w) => w - 1), []);
+  const goToNextWeek = useCallback(() => setWeekOffset((w) => Math.min(w + 1, 0)), []);
+  const resetToCurrentWeek = useCallback(() => setWeekOffset(0), []);
 
   useEffect(() => {
     async function init() {
@@ -144,10 +155,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
         activeAnimation,
         userId,
         isAuthenticated,
+        weekOffset,
         submitEntry,
         hasEntryForDate,
         setActiveAnimation,
         refreshEntries,
+        goToPreviousWeek,
+        goToNextWeek,
+        resetToCurrentWeek,
+        canGoNext,
       }}
     >
       {children}

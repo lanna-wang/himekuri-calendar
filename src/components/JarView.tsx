@@ -162,11 +162,7 @@ export default function JarView() {
 function EntryDetail({ entry, onClose }: { entry: GratitudeEntry; onClose: () => void }) {
   const date = new Date(entry.date + "T12:00:00");
   const starSrc = entry.starImage || getStarImageByIndex(0);
-  const [artwork, setArtwork] = useState<MetArtwork | null>(null);
-
-  useEffect(() => {
-    getArtworkForDate(entry.date).then(setArtwork);
-  }, [entry.date]);
+  const artwork = getArtworkForDate(entry.date);
 
   return (
     <>
