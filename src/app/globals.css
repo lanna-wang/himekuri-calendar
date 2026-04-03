@@ -1,26 +1,201 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-wood: #d4b896;
+  --color-wood-dark: #c4a882;
+  --color-wood-light: #e0c9a8;
+  --color-mint: #d4e8e0;
+  --color-mint-dark: #b8d4c8;
+  --color-cream: #faf6f1;
+  --color-cream-dark: #f0e8dc;
+  --color-charcoal: #2c2c2c;
+  --color-muted: #8a7e74;
+  --color-rose: #d4a0a0;
+  --color-star-pink: #f0c6c6;
+  --color-star-lavender: #c6d4f0;
+  --color-star-mint: #c6f0d4;
+  --color-star-butter: #f0e8c6;
+  --color-star-peach: #f0d4c6;
+
+  --font-pangaia: var(--font-pangaia);
+  --font-mori: var(--font-mori);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Clean cream background with grid lines */
+body {
+  background-color: var(--color-cream);
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+@media (min-width: 640px) {
+  body {
+    background-size: 60px 60px;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@media (min-width: 1024px) {
+  body {
+    background-size: 80px 80px;
+  }
+}
+
+/* Paper texture for card backs / modals */
+.paper-texture {
+  background-color: var(--color-cream);
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(0, 0, 0, 0.01) 0%, transparent 70%),
+    radial-gradient(ellipse at 80% 50%, rgba(0, 0, 0, 0.01) 0%, transparent 70%);
+}
+
+/* Scroll snap for mobile card tray */
+.card-tray-scroll {
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.card-tray-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.card-snap {
+  scroll-snap-align: center;
+}
+
+/* Touch targets */
+.touch-target {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Hover-only effects */
+@media (hover: hover) {
+  .hover-lift {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .hover-lift:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  }
+  .hover-glow:hover {
+    filter: brightness(1.1);
+    transform: scale(1.1);
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Hand-drawn divider */
+.divider-hand {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--color-muted) 15%,
+    var(--color-muted) 40%,
+    transparent 45%,
+    var(--color-muted) 50%,
+    var(--color-muted) 85%,
+    transparent 100%
+  );
+  opacity: 0.3;
+}
+
+/* Input underline style */
+.input-line {
+  display: block;
+  border: none;
+  border-bottom: 1px solid var(--color-muted);
+  background: transparent;
+  outline: none;
+  width: 100%;
+  padding: 8px 0;
+  font-family: var(--font-mori);
+  font-size: 16px;
+  line-height: 1.5;
+  color: #8A7E74;
+}
+
+.input-line:focus {
+  border-bottom-color: var(--color-rose);
+}
+
+.input-line::placeholder {
+  color: transparent;
+}
+
+/* Doily shadow */
+.doily-shadow {
+  background: radial-gradient(
+    ellipse at center,
+    rgba(0, 0, 0, 0.05) 0%,
+    rgba(0, 0, 0, 0.02) 40%,
+    transparent 70%
+  );
+}
+
+/* Cherry blossom petal fall */
+@keyframes petalFall {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 0.9;
+  }
+  30% {
+    transform: translate(calc(var(--petal-drift) * 0.4), 40px) rotate(120deg);
+    opacity: 0.8;
+  }
+  60% {
+    transform: translate(calc(var(--petal-drift) * 0.8), 100px) rotate(240deg);
+    opacity: 0.6;
+  }
+  100% {
+    transform: translate(var(--petal-drift), 180px) rotate(var(--petal-rotation));
+    opacity: 0;
+  }
+}
+
+/* Star shimmer keyframes */
+@keyframes shimmer {
+  0%, 100% { opacity: 0; transform: scale(0); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes star-bounce {
+  0% { transform: translateY(-20px); }
+  60% { transform: translateY(4px); }
+  80% { transform: translateY(-2px); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes fold-card {
+  0% { transform: scale(1) rotateY(0deg); opacity: 1; }
+  50% { transform: scale(0.5) rotateY(90deg); opacity: 0.8; }
+  100% { transform: scale(0.1) rotateY(180deg); opacity: 0; }
+}
+
+@keyframes jar-slide-up {
+  0% { transform: translateY(100%); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes jar-slide-down {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(100%); }
+}
+
+@keyframes float-up {
+  0% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(-60px); opacity: 0; }
 }
