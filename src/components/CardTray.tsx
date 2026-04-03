@@ -2,16 +2,26 @@
 
 import { useRef, useEffect, useState } from "react";
 import CalendarCard from "./CalendarCard";
-import { getWeekDates, isSameDay } from "@/lib/utils";
-import { getWeekArtworks } from "@/lib/mock-data";
+import { getWeekDates, isSameDay, dateToKey } from "@/lib/utils";
+import { MetArtwork, getArtworksForWeek } from "@/lib/met-api";
 
 export default function CardTray() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [today] = useState(() => new Date());
   const weekDates = getWeekDates(today);
-  const artworks = getWeekArtworks(weekDates);
   const todayIndex = weekDates.findIndex((d) => isSameDay(d, today));
   const [activeIndex, setActiveIndex] = useState(todayIndex >= 0 ? todayIndex : 0);
+  const [artworks, setArtworks] = useState<(MetArtwork | null)[]>(new Array(7).fill(null));
+  const [loading, setLoading] = useState(true);
+
+  // Fetch artworks from Met API
+  useEffect(() => {
+    getArtworksForWeek(weekDates).then((results) => {
+      setArtworks(results);
+      setLoading(false);
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Auto-scroll to today on mount (mobile)
   useEffect(() => {
@@ -25,7 +35,7 @@ export default function CardTray() {
       const scrollLeft = card.offsetLeft - container.offsetWidth / 2 + card.offsetWidth / 2;
       container.scrollTo({ left: scrollLeft, behavior: "instant" });
     }
-  }, [todayIndex]);
+  }, [todayIndex, loading]);
 
   // Track active card for dot indicator (mobile)
   useEffect(() => {
@@ -52,9 +62,31 @@ export default function CardTray() {
     return () => container.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Convert MetArtwork to the shape CalendarCard expects
+  const toCardArtwork = (art: MetArtwork | null) => {
+    if (!art) return undefined;
+    return {
+      id: String(art.objectId),
+      date: "",
+      objectId: art.objectId,
+      title: art.title,
+      artist: art.artist,
+      artworkDate: art.artworkDate,
+      primaryImageUrl: art.primaryImageUrl,
+      blurb: art.blurb,
+    };
+  };
+
   return (
     <div className="w-full flex flex-col items-center">
       <div className="relative w-full">
+        {/* Loading state */}
+        {loading && (
+          <p className="text-center font-[family-name:var(--font-pangaia)] font-extralight italic text-muted text-sm mb-4 animate-pulse">
+            discovering today&apos;s art...
+          </p>
+        )}
+
         {/* Cards container */}
         <div
           ref={scrollRef}
@@ -64,7 +96,7 @@ export default function CardTray() {
             <CalendarCard
               key={date.toISOString()}
               date={date}
-              artwork={artworks[i]}
+              artwork={toCardArtwork(artworks[i])}
               today={today}
             />
           ))}

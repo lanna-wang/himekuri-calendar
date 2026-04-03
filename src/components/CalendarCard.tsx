@@ -24,7 +24,7 @@ export default function CalendarCard({ date, artwork, today }: CalendarCardProps
   const [happy, setHappy] = useState("");
   const [lookingForward, setLookingForward] = useState("");
 
-  const { submitEntry, hasEntryForDate, soundEnabled, setActiveAnimation } = useApp();
+  const { submitEntry, hasEntryForDate, setActiveAnimation } = useApp();
 
   const isToday = isSameDay(date, today);
   const isPast = isBeforeDay(date, today);
@@ -48,7 +48,7 @@ export default function CalendarCard({ date, artwork, today }: CalendarCardProps
       }
     }
     setShowModal(true);
-  }, [alreadyDone, soundEnabled, dateStr]);
+  }, [alreadyDone, dateStr]);
 
   const handleCloseModal = useCallback(() => {
     setShowModal(false);

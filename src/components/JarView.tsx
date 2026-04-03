@@ -1,14 +1,15 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import GlassJar from "./GlassJar";
 import Star from "./Star";
 import { useApp } from "@/lib/context";
-import { GratitudeEntry, getArtworkByDate } from "@/lib/mock-data";
-import { formatMonthFull, formatMonthShort, formatDayShort, formatDayNumber } from "@/lib/utils";
+import { GratitudeEntry } from "@/lib/mock-data";
+import { formatMonthFull } from "@/lib/utils";
 import { getStarImageByIndex } from "./Star";
+import { MetArtwork, getArtworkForDate } from "@/lib/met-api";
 
 const MONTHS = Array.from({ length: 12 }, (_, i) => i);
 const QUARTERS = ["Q1", "Q2", "Q3", "Q4"];
@@ -161,7 +162,11 @@ export default function JarView() {
 function EntryDetail({ entry, onClose }: { entry: GratitudeEntry; onClose: () => void }) {
   const date = new Date(entry.date + "T12:00:00");
   const starSrc = entry.starImage || getStarImageByIndex(0);
-  const artwork = getArtworkByDate(entry.date);
+  const [artwork, setArtwork] = useState<MetArtwork | null>(null);
+
+  useEffect(() => {
+    getArtworkForDate(entry.date).then(setArtwork);
+  }, [entry.date]);
 
   return (
     <>

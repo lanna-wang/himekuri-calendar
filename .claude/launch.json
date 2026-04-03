@@ -3,10 +3,13 @@
   "configurations": [
     {
       "name": "himekuri-dev",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeExecutable": "/Users/lannawang/.nvm/versions/node/v20.20.0/bin/node",
+      "runtimeArgs": ["/Users/lannawang/.nvm/versions/node/v20.20.0/bin/npx", "next", "dev"],
       "port": 3000,
-      "autoPort": true
+      "autoPort": true,
+      "env": {
+        "PATH": "/Users/lannawang/.nvm/versions/node/v20.20.0/bin:/usr/bin:/bin"
+      }
     }
   ]
 }

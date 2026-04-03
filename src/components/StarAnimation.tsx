@@ -17,7 +17,7 @@ type Phase = "folding" | "star-arc" | "jar-visible" | "done";
 
 export default function StarAnimation({ dateStr, starImage, onComplete }: StarAnimationProps) {
   const [phase, setPhase] = useState<Phase>("folding");
-  const { entries, soundEnabled } = useApp();
+  const { entries } = useApp();
 
   const advancePhase = useCallback(() => {
     setPhase((prev) => {
@@ -41,7 +41,7 @@ export default function StarAnimation({ dateStr, starImage, onComplete }: StarAn
     }
     if (phase === "star-arc") {
       const t = setTimeout(() => {
-        if (soundEnabled) playStarPop();
+        playStarPop();
         advancePhase();
       }, 800);
       return () => clearTimeout(t);
@@ -53,7 +53,7 @@ export default function StarAnimation({ dateStr, starImage, onComplete }: StarAn
       }, 2000);
       return () => clearTimeout(t);
     }
-  }, [phase, advancePhase, onComplete, soundEnabled]);
+  }, [phase, advancePhase, onComplete]);
 
   return (
     <AnimatePresence>
