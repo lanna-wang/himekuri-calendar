@@ -291,7 +291,7 @@ function GratitudeField({
         onChange={(e) => onChange(e.target.value)}
         onInput={handleInput}
         rows={1}
-        className="input-line py-2.5 min-h-[44px] resize-none overflow-hidden"
+        className="input-line py-2.5 min-h-[44px] resize-none"
       />
     </div>
   );
