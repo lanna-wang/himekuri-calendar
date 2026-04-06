@@ -7,7 +7,7 @@ import { useApp } from "@/lib/context";
 
 export default function Navigation() {
   const pathname = usePathname();
-  const { streak, weekOffset, goToPreviousWeek, goToNextWeek, resetToCurrentWeek, canGoNext } = useApp();
+  const { entries, weekOffset, goToPreviousWeek, goToNextWeek, resetToCurrentWeek, canGoNext } = useApp();
   const isCalendar = pathname === "/";
 
   return (
@@ -53,7 +53,7 @@ export default function Navigation() {
               !isCalendar ? "text-charcoal" : "text-muted hover:text-charcoal"
             }`}
           >
-            jar{streak > 0 ? ` · ${streak}` : ""}
+            jar{entries.length > 0 ? ` · ${entries.length}` : ""}
           </Link>
         </div>
 
