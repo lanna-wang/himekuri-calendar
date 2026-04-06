@@ -165,7 +165,7 @@ export default function CalendarCard({ date, artwork, today }: CalendarCardProps
               onClick={(e) => e.stopPropagation()}
             >
               {/* LEFT — Image + artwork info */}
-              <div className="sm:w-1/2 flex flex-col shrink-0">
+              <div className="sm:w-1/2 flex flex-col shrink-0 p-4 sm:p-6">
                 {/* Image */}
                 <div className="relative w-full shrink-0 aspect-[4/3] sm:aspect-auto sm:flex-1 sm:min-h-0">
                   {artwork ? (
@@ -181,7 +181,7 @@ export default function CalendarCard({ date, artwork, today }: CalendarCardProps
                   )}
                 </div>
                 {/* Artwork info below image */}
-                <div className="p-5 sm:p-6 shrink-0">
+                <div className="pt-4 sm:pt-5 shrink-0">
                   <h3 className="font-[family-name:var(--font-pangaia)] font-medium text-charcoal text-xl sm:text-2xl mb-1 leading-snug">
                     {artwork?.title}
                   </h3>
@@ -196,8 +196,13 @@ export default function CalendarCard({ date, artwork, today }: CalendarCardProps
                 </div>
               </div>
 
+              {/* Vertical divider — not full height */}
+              <div className="hidden sm:flex items-center py-10">
+                <div className="w-px h-full bg-charcoal/8" />
+              </div>
+
               {/* RIGHT — Prompts + done button */}
-              <div className="sm:w-1/2 flex flex-col p-5 sm:p-8 overflow-y-auto border-t sm:border-t-0 sm:border-l border-charcoal/5">
+              <div className="sm:flex-1 flex flex-col p-5 sm:py-8 sm:pr-8 sm:pl-6 overflow-y-auto border-t sm:border-t-0">
                 {/* Close button */}
                 <button
                   onClick={handleCloseModal}
