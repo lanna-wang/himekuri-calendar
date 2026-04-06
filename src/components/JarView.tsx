@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
+import WeeklySummary from "./WeeklySummary";
 import GlassJar from "./GlassJar";
 import Star from "./Star";
 import { useApp } from "@/lib/context";
@@ -107,6 +108,9 @@ export default function JarView() {
           ))}
         </div>
       </div>
+
+      {/* Weekly summary — shows on Saturdays */}
+      <WeeklySummary />
 
       {/* Glass jar — fills available space */}
       <div className="relative flex-1 w-full max-w-[500px] mb-8 min-h-0">
