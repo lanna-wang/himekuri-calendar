@@ -2,7 +2,6 @@
 
 import Navigation from "@/components/Navigation";
 import JarView from "@/components/JarView";
-import SignOutButton from "@/components/SignOutButton";
 import { AppProvider } from "@/lib/context";
 
 export default function JarPage() {
@@ -15,9 +14,6 @@ export default function JarPage() {
             <h1 className="font-[family-name:var(--font-pangaia)] font-medium text-charcoal text-3xl sm:text-4xl text-center select-none">
               gratitude jar
             </h1>
-            <div className="absolute top-1/2 -translate-y-1/2 right-6">
-              <SignOutButton />
-            </div>
           </div>
           <JarView />
         </main>

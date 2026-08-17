@@ -2,15 +2,6 @@
 
 import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
 import { GratitudeEntry, getStoredEntries, saveEntry, getEntryForDate, getStreak } from "./mock-data";
-import {
-  supabase,
-  getUserEntries,
-  submitEntryToDB,
-  computeStreak,
-  starIndexToPath,
-  starPathToIndex,
-  DBEntry,
-} from "./supabase";
 
 interface AppState {
   entries: GratitudeEntry[];
@@ -34,25 +25,12 @@ interface AppContextType extends AppState {
 
 const AppContext = createContext<AppContextType | null>(null);
 
-function dbToEntry(row: DBEntry): GratitudeEntry {
-  return {
-    id: `${row.uid}-${row.d}`,
-    date: row.d,
-    accomplished: row.a,
-    happy: row.h,
-    lookingForward: row.f,
-    artworkId: "",
-    starImage: starIndexToPath(row.s),
-    createdAt: row.d,
-  };
-}
-
 export function AppProvider({ children }: { children: ReactNode }) {
   const [entries, setEntries] = useState<GratitudeEntry[]>([]);
   const [streak, setStreak] = useState(0);
   const [activeAnimation, setActiveAnimation] = useState<string | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userId] = useState<string | null>(null);
+  const [isAuthenticated] = useState(false);
   const [weekOffset, setWeekOffset] = useState(0);
 
   const canGoNext = weekOffset < 0;
@@ -61,120 +39,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const resetToCurrentWeek = useCallback(() => setWeekOffset(0), []);
 
   useEffect(() => {
-    async function init() {
-      // Always load localStorage entries first (instant)
-      const localEntries = getStoredEntries();
-      setEntries(localEntries);
-      setStreak(getStreak());
-
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-
-        if (session?.user) {
-          setUserId(session.user.id);
-          setIsAuthenticated(true);
-
-          // Load from Supabase
-          const dbEntries = await getUserEntries(session.user.id);
-          const dbMapped = dbEntries.map(dbToEntry);
-
-          // Merge: Supabase entries take priority, localStorage fills gaps
-          const dbDates = new Set(dbMapped.map((e) => e.date));
-          const localOnly = localEntries.filter((e) => !dbDates.has(e.date));
-
-          // Upload any localStorage-only entries to Supabase
-          for (const entry of localOnly) {
-            await submitEntryToDB({
-              userId: session.user.id,
-              date: entry.date,
-              accomplished: entry.accomplished,
-              happy: entry.happy,
-              lookingForward: entry.lookingForward,
-              starIndex: starPathToIndex(entry.starImage),
-            }).catch(() => {});
-          }
-
-          // Combine all entries — deduplicate by date (Supabase wins)
-          const allEntries = [...dbMapped];
-          for (const local of localOnly) {
-            if (!dbDates.has(local.date)) {
-              allEntries.push(local);
-            }
-          }
-
-          setEntries(allEntries);
-
-          // Also sync merged entries back to localStorage for this device
-          const storageKey = "himekuri_entries";
-          try {
-            localStorage.setItem(storageKey, JSON.stringify(allEntries));
-          } catch {}
-
-          setStreak(await computeStreak(session.user.id));
-          return;
-        }
-      } catch {
-        // Supabase not available — localStorage already loaded above
-      }
-    }
-    init();
-
-    let subscription: { unsubscribe: () => void } | null = null;
-    try {
-      const { data } = supabase.auth.onAuthStateChange(async (_event, session) => {
-        if (session?.user) {
-          setUserId(session.user.id);
-          setIsAuthenticated(true);
-          const dbEntries = await getUserEntries(session.user.id);
-          setEntries(dbEntries.map(dbToEntry));
-          setStreak(await computeStreak(session.user.id));
-        } else {
-          setUserId(null);
-          setIsAuthenticated(false);
-          setEntries(getStoredEntries());
-          setStreak(getStreak());
-        }
-      });
-      subscription = data.subscription;
-    } catch {
-      // ignore
-    }
-
-    return () => subscription?.unsubscribe();
+    setEntries(getStoredEntries());
+    setStreak(getStreak());
   }, []);
 
   const refreshEntries = useCallback(async () => {
-    if (userId) {
-      const dbEntries = await getUserEntries(userId);
-      setEntries(dbEntries.map(dbToEntry));
-      setStreak(await computeStreak(userId));
-    } else {
-      setEntries(getStoredEntries());
-      setStreak(getStreak());
-    }
-  }, [userId]);
+    setEntries(getStoredEntries());
+    setStreak(getStreak());
+  }, []);
 
   const submitEntry = useCallback(
     (entry: Omit<GratitudeEntry, "id" | "createdAt">) => {
-      // Always save to localStorage as backup
       saveEntry(entry);
 
-      if (userId) {
-        const starIndex = starPathToIndex(entry.starImage);
-        submitEntryToDB({
-          userId,
-          date: entry.date,
-          accomplished: entry.accomplished,
-          happy: entry.happy,
-          lookingForward: entry.lookingForward,
-          starIndex,
-        }).then(() => refreshEntries());
-      }
-
-      // Optimistic update
       const optimistic: GratitudeEntry = {
         ...entry,
-        id: userId ? `${userId}-${entry.date}` : Math.random().toString(36).slice(2),
+        id: Math.random().toString(36).slice(2),
         createdAt: entry.date,
       };
       setEntries((prev) => {
@@ -183,7 +63,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       });
       return optimistic;
     },
-    [userId, refreshEntries]
+    [refreshEntries]
   );
 
   const hasEntryForDate = useCallback(
