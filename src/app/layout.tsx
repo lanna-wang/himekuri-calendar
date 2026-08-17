@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 const mori = localFont({
@@ -77,6 +78,7 @@ export default function RootLayout({
     <html lang="en" className={`${pangaia.variable} ${mori.variable} h-full`}>
       <body className="min-h-[100dvh] flex flex-col bg-cream text-charcoal antialiased">
         {children}
+        <Analytics />
       </body>
     </html>
   );
