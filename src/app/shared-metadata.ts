@@ -24,7 +24,7 @@ export const sharedOpenGraph = {
       url: "/og-image.png",
       width: 1200,
       height: 630,
-      alt: "himekuri — a daily gratitude calendar showing the day's artwork",
+      alt: "The himekuri wordmark beside a watercolour cherry blossom tree and mailbox",
     },
   ],
 } satisfies NonNullable<Metadata["openGraph"]>;
