@@ -1,6 +1,13 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import {
+  SITE_DESCRIPTION,
+  SITE_TITLE,
+  SITE_URL,
+  sharedOpenGraph,
+  sharedTwitter,
+} from "./shared-metadata";
 
 const mori = localFont({
   src: [
@@ -55,12 +62,31 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
+  themeColor: "#faf6ef",
 };
 
 export const metadata: Metadata = {
-  title: "himekuri — daily gratitude calendar",
-  description:
-    "A daily art discovery and gratitude journaling ritual inspired by the Japanese himekuri tear-off calendar.",
+  metadataBase: new URL(SITE_URL),
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    ...sharedOpenGraph,
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    url: "/",
+  },
+  twitter: {
+    ...sharedTwitter,
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
