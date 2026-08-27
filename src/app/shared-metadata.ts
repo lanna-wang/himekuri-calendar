@@ -4,10 +4,10 @@ export const SITE_URL = "https://himekuri-calendar-seven.vercel.app";
 
 export const SITE_NAME = "himekuri";
 
-export const SITE_TITLE = "himekuri — daily gratitude calendar";
+export const SITE_TITLE = "himekuri: daily gratitude calendar";
 
 export const SITE_DESCRIPTION =
-  "A daily art discovery and gratitude journaling ritual inspired by the Japanese himekuri tear-off calendar.";
+  "A daily art discovery and gratitude journaling ritual inspired by the Japanese himekuri tear-off calendar";
 
 /**
  * Nested metadata objects are shallowly *replaced* between segments, not
