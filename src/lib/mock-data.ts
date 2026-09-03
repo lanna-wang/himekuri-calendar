@@ -299,3 +299,9 @@ export function getStreak(): number {
   }
   return streak;
 }
+
+// Replaces the whole entry set. Used when restoring from a backup file.
+export function saveAllEntries(entries: GratitudeEntry[]): void {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+}

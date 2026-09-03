@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
 import { GratitudeEntry, getStoredEntries, saveEntry, getEntryForDate, getStreak } from "./mock-data";
+import { requestPersistentStorage } from "./backup";
 
 interface AppState {
   entries: GratitudeEntry[];
@@ -39,8 +40,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const resetToCurrentWeek = useCallback(() => setWeekOffset(0), []);
 
   useEffect(() => {
-    setEntries(getStoredEntries());
+    const stored = getStoredEntries();
+    setEntries(stored);
     setStreak(getStreak());
+    // Ask the browser not to evict us once there's something worth keeping.
+    if (stored.length > 0) void requestPersistentStorage();
   }, []);
 
   const refreshEntries = useCallback(async () => {
@@ -51,6 +55,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const submitEntry = useCallback(
     (entry: Omit<GratitudeEntry, "id" | "createdAt">) => {
       saveEntry(entry);
+      void requestPersistentStorage();
 
       const optimistic: GratitudeEntry = {
         ...entry,
