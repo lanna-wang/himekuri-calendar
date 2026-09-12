@@ -7,23 +7,15 @@ import {
   downloadBackup,
   getBackupSnapshot,
   getServerBackupSnapshot,
-  restoreBackup,
+  markRestored,
+  parseBackup,
   subscribeBackupState,
-  type ImportResult,
 } from "@/lib/backup";
 
 const REMIND_AFTER_ENTRIES = 3;
 
-function summarise(r: ImportResult): string {
-  const parts: string[] = [];
-  if (r.added) parts.push(`${r.added} restored`);
-  if (r.updated) parts.push(`${r.updated} updated`);
-  if (r.unchanged) parts.push(`${r.unchanged} already here`);
-  return parts.join(" · ");
-}
-
 export default function BackupControls() {
-  const { entries, refreshEntries } = useApp();
+  const { entries, importEntries } = useApp();
   const fileInput = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -39,7 +31,7 @@ export default function BackupControls() {
 
   const handleExport = () => {
     setError(null);
-    const count = downloadBackup();
+    const count = downloadBackup(entries);
     setMessage(`saved ${count} ${count === 1 ? "note" : "notes"} to your device`);
   };
 
@@ -47,9 +39,10 @@ export default function BackupControls() {
     setMessage(null);
     setError(null);
     try {
-      const result = restoreBackup(await file.text());
-      await refreshEntries();
-      setMessage(summarise(result));
+      const incoming = parseBackup(await file.text());
+      const count = await importEntries(incoming);
+      markRestored();
+      setMessage(`${count} ${count === 1 ? "note" : "notes"} restored`);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Couldn't read that file.");
     }

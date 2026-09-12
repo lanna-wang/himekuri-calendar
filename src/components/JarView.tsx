@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import BackupControls from "./BackupControls";
+import SignOutButton from "./SignOutButton";
 import GlassJar from "./GlassJar";
 import Star from "./Star";
 import { useApp } from "@/lib/context";
@@ -111,6 +112,10 @@ export default function JarView() {
 
       {/* Export / import backup */}
       <BackupControls />
+
+      <div className="mb-4">
+        <SignOutButton />
+      </div>
 
       {/* Glass jar — fills available space */}
       <div className="relative flex-1 w-full max-w-[500px] mb-8 min-h-0">

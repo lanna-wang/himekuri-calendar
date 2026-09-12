@@ -1,8 +1,4 @@
-import {
-  GratitudeEntry,
-  getStoredEntries,
-  saveAllEntries,
-} from "./mock-data";
+import { GratitudeEntry } from "./mock-data";
 
 const BACKUP_FORMAT = "himekuri-backup";
 const BACKUP_VERSION = 1;
@@ -75,19 +71,19 @@ function isEntry(value: unknown): value is GratitudeEntry {
   );
 }
 
-/** Builds the backup payload for the entries currently in this browser. */
-export function buildBackup(): BackupFile {
+/** Builds the backup payload for the given entries. */
+export function buildBackup(entries: GratitudeEntry[]): BackupFile {
   return {
     format: BACKUP_FORMAT,
     version: BACKUP_VERSION,
     exportedAt: new Date().toISOString(),
-    entries: getStoredEntries(),
+    entries,
   };
 }
 
 /** Prompts the browser to download the jar as a .json file. */
-export function downloadBackup(): number {
-  const backup = buildBackup();
+export function downloadBackup(entries: GratitudeEntry[]): number {
+  const backup = buildBackup(entries);
   const blob = new Blob([JSON.stringify(backup, null, 2)], {
     type: "application/json",
   });
@@ -113,11 +109,11 @@ export function downloadBackup(): number {
 }
 
 /**
- * Merges a backup file into the existing jar. Entries are matched by date;
- * where both sides have the same day, the one written most recently wins, so
- * merging two devices doesn't clobber the newer note.
+ * Validates a backup file and returns the entries it holds. Persisting them is
+ * the caller's job — entries now live in the account, not localStorage, so the
+ * merge happens server-side via upsert on (uid, date).
  */
-export function restoreBackup(raw: string): ImportResult {
+export function parseBackup(raw: string): GratitudeEntry[] {
   let parsed: unknown;
   try {
     parsed = JSON.parse(raw);
@@ -130,34 +126,15 @@ export function restoreBackup(raw: string): ImportResult {
     throw new Error("That doesn't look like a himekuri backup.");
   }
 
-  const incoming = file.entries.filter(isEntry);
-  if (incoming.length === 0) {
+  const entries = file.entries.filter(isEntry);
+  if (entries.length === 0) {
     throw new Error("No readable entries in that file.");
   }
+  return entries;
+}
 
-  const byDate = new Map<string, GratitudeEntry>();
-  for (const entry of getStoredEntries()) byDate.set(entry.date, entry);
-
-  let added = 0;
-  let updated = 0;
-  let unchanged = 0;
-
-  for (const entry of incoming) {
-    const existing = byDate.get(entry.date);
-    if (!existing) {
-      byDate.set(entry.date, entry);
-      added++;
-    } else if ((entry.createdAt ?? "") > (existing.createdAt ?? "")) {
-      byDate.set(entry.date, entry);
-      updated++;
-    } else {
-      unchanged++;
-    }
-  }
-
-  saveAllEntries([...byDate.values()].sort((a, b) => a.date.localeCompare(b.date)));
+export function markRestored(): void {
   notify();
-  return { added, updated, unchanged };
 }
 
 /**

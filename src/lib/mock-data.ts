@@ -305,3 +305,13 @@ export function saveAllEntries(entries: GratitudeEntry[]): void {
   if (typeof window === "undefined") return;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
 }
+
+// The database stores the star as a smallint index rather than a path.
+export function starIndexToPath(index: number): string {
+  return STAR_IMAGES[((index % STAR_IMAGES.length) + STAR_IMAGES.length) % STAR_IMAGES.length];
+}
+
+export function starPathToIndex(path: string): number {
+  const i = STAR_IMAGES.indexOf(path);
+  return i >= 0 ? i : 0;
+}
